@@ -30,5 +30,11 @@
             <scope>system</scope>
             <systemPath>${basedir}/lib/peersim-1.0.5.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.10</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
