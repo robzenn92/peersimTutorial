@@ -1,7 +1,7 @@
 package helpers;
 
-import tutorial2.utils.NodeDescriptor;
-import tutorial2.utils.PartialView;
+import newscast.utils.NodeDescriptor;
+import newscast.utils.PartialView;
 
 import java.util.Random;
 

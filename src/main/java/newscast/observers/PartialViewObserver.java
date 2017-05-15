@@ -1,4 +1,4 @@
-package tutorial2.observers;
+package newscast.observers;
 
 import peersim.config.Configuration;
 import peersim.core.Node;
@@ -6,7 +6,7 @@ import peersim.core.Protocol;
 import peersim.graph.Graph;
 import peersim.reports.GraphObserver;
 import peersim.util.FileNameGenerator;
-import tutorial2.NewscastProtocol;
+import newscast.NewscastProtocol;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

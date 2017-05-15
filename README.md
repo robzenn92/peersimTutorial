@@ -19,7 +19,7 @@ Here there are a list of useful links
 
 [1] http://peersim.sourceforge.net/tutorial1/tutorial1.pdf
 
-[2] http://peersim.sourceforge.net/tutorial2/tutorial2.pdf
+[2] http://peersim.sourceforge.net/newscast/newscast.pdf
 
 [3] http://peersim.sourceforge.net/tutorialed/tutorialed.pdf
 

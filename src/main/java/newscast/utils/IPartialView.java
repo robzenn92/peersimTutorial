@@ -1,4 +1,4 @@
-package tutorial2.utils;
+package newscast.utils;
 
 import peersim.core.Node;
 import java.util.List;

@@ -1,11 +1,11 @@
 package unit;
 
 import helpers.NodeHelper;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import peersim.config.Configuration;
 import peersim.config.ParsedProperties;
-import tutorial2.utils.NodeDescriptor;
+import newscast.utils.NodeDescriptor;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import static org.testng.Assert.assertTrue;
 public class TestNodeDescriptors {
 
 
-    @BeforeClass
+    @BeforeSuite
     public void setUpConfiguration() throws IOException {
         Configuration.setConfig(new ParsedProperties("src/test/resources/tests.cfg"));
     }

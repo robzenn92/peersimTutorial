@@ -1,4 +1,4 @@
-package tutorial2.utils;
+package newscast.utils;
 
 import peersim.core.CommonState;
 import peersim.core.Node;
@@ -10,7 +10,7 @@ public class NodeDescriptor implements Comparable {
 
     public NodeDescriptor(Node node) {
         this.node = node;
-        this.age = CommonState.r.nextInt(20);
+        this.age = CommonState.getIntTime();
     }
 
     public NodeDescriptor(Node node, int age) {
@@ -20,7 +20,7 @@ public class NodeDescriptor implements Comparable {
 
     public int compareTo(Object o) {
         int age1 = ((NodeDescriptor) o).getAge();
-        return (age < age1) ? -1 : ((age == age1) ? 0 : 1);
+        return (age < age1) ? 1 : ((age == age1) ? 0 : -1);
     }
 
     public void updateAge() {
