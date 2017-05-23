@@ -14,9 +14,10 @@ import peersim.core.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 /**
+ * The EpTO dissemination component
+ *
  * The algorithm assumes the existence of a peer sampling service (PSS) responsible for keeping p’s view
  * up-to-date with a random stream of at least K deemed correct processes allowing a fanout of size K.
  * TTL (time to live) holds the number of rounds for which each event needs to be relayed during its dissemination.
@@ -44,7 +45,7 @@ public class EpTODissemination implements CDProtocol {
     private static final String PAR_TTL = "ttl";
 
     /**
-     * The ordering component protocol
+     * The ordering component protocol that the dissemination component must know in order to invoke orderEvents
      */
     private static final String PAR_PROT_ORD = "protocol_ord";
 
@@ -68,6 +69,9 @@ public class EpTODissemination implements CDProtocol {
      */
     private final int id_ord_protocol;
 
+    /**
+     * The nextBall set collects the events to be sent in the next round by process p
+     */
     private HashMap<Integer, Event> nextBall = new HashMap<Integer, Event>();
 
     // =================================
@@ -93,7 +97,7 @@ public class EpTODissemination implements CDProtocol {
         event.timestamp = CommonState.getIntTime(); // getClock()
         event.ttl = 0;
         event.sourceId = 1; // TODO: change with this.Node.getID()
-        nextBall.put(event.id, event);
+        nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
     }
 
     /**
@@ -130,6 +134,7 @@ public class EpTODissemination implements CDProtocol {
         }
     }
 
+    // task every delta time units
     public void nextCycle(Node node, int protocolID) {
 
         int linkableID = FastConfig.getLinkable(protocolID);
@@ -137,21 +142,27 @@ public class EpTODissemination implements CDProtocol {
 
         if (linkable.degree() > 0) {
 
-            for (Event e : nextBall.values()) {
-                e.ttl++;
+            // foreach event in nextBall do
+            for (Event event : nextBall.values()) {
+                // event.ttl event.ttl + 1
+                event.ttl++;
             }
 
             if (nextBall.size() != 0) {
 
                 ArrayList<NodeDescriptor> peers = linkable.selectNeighbors(K);
-                for (NodeDescriptor peer : peers) {
-                    send(nextBall, peer.getNode(), protocolID);
+
+                // foreach q in peers do send BALL(nextBall) to q
+                for (NodeDescriptor q : peers) {
+                    send(nextBall, q.getNode(), protocolID);
                 }
             }
 
+            // orderEvents(nextBall)
             EpTOOrdering EpTOOrdering = (EpTOOrdering) node.getProtocol(id_ord_protocol);
-            System.out.println("I know my ordering component is " + EpTOOrdering);
             EpTOOrdering.orderEvents((HashMap<Integer, Event>) nextBall.clone());
+
+            // nextBall = 0
             nextBall.clear();
         }
     }
