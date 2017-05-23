@@ -310,16 +310,7 @@ public class SimpleNewscast implements CDProtocol, Linkable
             return;
         }
 
-//        System.out.println("node " + n.getID() + " scambia con " + peerNode.getID());
-
-
         SimpleNewscast peer = (SimpleNewscast) (peerNode.getProtocol(protocolID));
-
-//        System.out.println("pre merge");
-//        System.out.println("node cache: " + stamp_n(this.cache));
-//        System.out.println("node tstamps: " + stamp_ts(this.tstamps));
-//        System.out.println("peer cache: " + stamp_n(peer.cache));
-//        System.out.println("peer tstamps: " + stamp_ts(peer.tstamps));
 
         merge(n, peer, peerNode);
 
@@ -333,12 +324,6 @@ public class SimpleNewscast implements CDProtocol, Linkable
         tstamps[0] = peer.tstamps[0] = CommonState.getIntTime();
         cache[0] = peerNode;
         peer.cache[0] = n;
-
-//        System.out.println("post merge");
-//        System.out.println("node cache: " + stamp_n(cache));
-//        System.out.println("node tstamps: " + stamp_ts(tstamps));
-//        System.out.println("peer cache: " + stamp_n(peer.cache));
-//        System.out.println("peer tstamps: " + stamp_ts(peer.tstamps));
     }
 
     public String stamp_n(Node[] nodes) {

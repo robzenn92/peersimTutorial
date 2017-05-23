@@ -10,6 +10,8 @@ import newscast.utils.PartialView;
 import newscast.utils.PeerSamplingProtocol;
 import newscast.utils.Utils;
 
+import java.util.ArrayList;
+
 public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol, Linkable {
 
 
@@ -50,6 +52,16 @@ public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol
 
     public NodeDescriptor selectNeighbor() {
         return view.getRandomPeer();
+    }
+
+    public ArrayList<NodeDescriptor> selectNeighbors(int k) {
+
+        ArrayList<NodeDescriptor> neighbors = new ArrayList<NodeDescriptor>(k);
+        do {
+            neighbors.add(selectNeighbor());
+        }
+        while (neighbors.size() != k);
+        return neighbors;
     }
 
     // =================================
@@ -125,17 +137,4 @@ public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol
         this.view = view;
     }
 
-    //    @Override
-//    public String toString() {
-//
-//        String s = "";
-//
-//        if (this.view.size() == 0) {
-//            s +=  "NULL";
-//        } else {
-//            for (NodeDescriptor nd : this.view.getPeers())
-//                s += nd.getNode().getIndex() + ";";
-//        }
-//        return s;
-//    }
 }
