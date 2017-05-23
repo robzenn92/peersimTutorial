@@ -151,7 +151,7 @@ public class EpTODissemination implements CDProtocol {
 
             EpTOOrdering EpTOOrdering = (EpTOOrdering) node.getProtocol(id_ord_protocol);
             System.out.println("I know my ordering component is " + EpTOOrdering);
-            EpTOOrdering.orderEvents((HashSet<Event>) nextBall.clone());
+            EpTOOrdering.orderEvents((HashMap<Integer, Event>) nextBall.clone());
             nextBall.clear();
         }
     }
