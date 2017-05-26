@@ -2,17 +2,18 @@ package newscast;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
 
 import newscast.utils.NodeDescriptor;
 import newscast.utils.PartialView;
-import newscast.utils.PeerSamplingProtocol;
 import newscast.utils.Utils;
+import pss.PeerSamplingService;
 
 import java.util.ArrayList;
 
-public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol, Linkable {
+public class NewscastProtocol extends PeerSamplingService implements CDProtocol, Linkable {
 
 
     // =================================
@@ -41,7 +42,13 @@ public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol
     //  Constructor implementation
     // =================================
 
+    public NewscastProtocol(int cache) {
+        this.cache = cache;
+        this.view = new PartialView(cache);
+    }
+
     public NewscastProtocol(String n) {
+        super(n);
         cache = Configuration.getInt(n + "." + PAR_CACHE, Utils.DEFAULT_CACHE_SIZE);
         view = new PartialView(cache);
     }
@@ -62,28 +69,6 @@ public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol
         }
         while (neighbors.size() != k);
         return neighbors;
-    }
-
-    // =================================
-    //  CDProtocol implementation
-    // =================================
-
-    public void nextCycle(Node node, int protocolID) {
-
-        // Get a random peer from the PartialView
-        NodeDescriptor neighbour = selectNeighbor();
-        NewscastProtocol destination = (NewscastProtocol) neighbour.getNode().getProtocol(protocolID);
-
-        // Merge everything
-        PartialView cloned = null;
-        try {
-            cloned = view.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-
-        view.merge(destination.getView(), node, neighbour.getNode());
-        // destination.getView().merge(cloned, neighbour.getNode(), node);
     }
 
     // =================================
@@ -114,15 +99,7 @@ public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol
     }
 
     public Object clone() {
-
-        NewscastProtocol newscast = null;
-        try { newscast = (NewscastProtocol) super.clone(); }
-        catch( CloneNotSupportedException e ) {} // never happens
-
-        newscast.setCache(cache);
-        newscast.setView(new PartialView(cache));
-
-        return newscast;
+        return new NewscastProtocol(cache);
     }
 
     public void setCache(int cache) {
@@ -137,4 +114,23 @@ public class NewscastProtocol extends PeerSamplingProtocol implements CDProtocol
         this.view = view;
     }
 
+    public void myTurn(Node node, int pid) {
+
+        System.out.println("Node " + node.getID() + " is executing Newscast at cycle " + CommonState.getTime());
+
+        // Get a random peer from the PartialView
+        NodeDescriptor neighbour = selectNeighbor();
+        NewscastProtocol destination = (NewscastProtocol) neighbour.getNode().getProtocol(pid);
+
+        // Merge everything
+        PartialView cloned = null;
+        try {
+            cloned = view.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        view.merge(destination.getView(), node, neighbour.getNode());
+        // destination.getView().merge(cloned, neighbour.getNode(), node);
+    }
 }
