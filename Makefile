@@ -10,7 +10,7 @@ compile:
 	javac -sourcepath src -classpath $(LIB_JARS) -d target/classes $(shell find src -name *.java)
 
 run:
-	java -ea -cp $(LIB_JARS):target/classes peersim.Simulator newscast.cfg
+	java -ea -cp $(LIB_JARS):target/classes peersim.Simulator src/main/resources/newscast.cfg
 
 clean:
 	rm -rf target
