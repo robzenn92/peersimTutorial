@@ -18,9 +18,11 @@
 
 package newscast;
 
-import peersim.cdsim.*;
-import peersim.config.*;
-import peersim.core.*;
+import peersim.cdsim.CDProtocol;
+import peersim.config.Configuration;
+import peersim.core.Linkable;
+import peersim.core.Node;
+import peersim.core.CommonState;
 
 /**
  * This class represents the information stored by a node in the simplified
