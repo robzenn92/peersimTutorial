@@ -1,9 +1,11 @@
 package epto;
 
+import epto.utils.Ball;
 import epto.utils.Event;
 import epto.utils.Utils;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Node;
 
 import java.util.HashMap;
@@ -12,11 +14,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-
 /**
  * The EpTO ordering component
  */
-public class EpTOOrdering implements CDProtocol {
+public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 
     // =================================
     //  Configuration Parameters
@@ -32,6 +33,11 @@ public class EpTOOrdering implements CDProtocol {
     // =================================
     //  Parameters
     // =================================
+
+    /**
+     * The id of this protocol in the protocol array
+     */
+    public static int PID = 0;
 
     /**
      * The number of rounds for which each event needs to be relayed during its dissemination
@@ -57,14 +63,18 @@ public class EpTOOrdering implements CDProtocol {
     //  Constructor implementation
     // =================================
 
-    public EpTOOrdering(String n) {
-        TTL = Configuration.getInt(n + "." + PAR_TTL, Utils.DEFAULT_TTL);
+    public EpTOOrdering(String prefix) {
+
+        PID = Configuration.lookupPid(prefix.replace("protocol.",""));
+        TTL = Configuration.getInt(prefix + "." + PAR_TTL, Utils.DEFAULT_TTL);
+
         received.clear();
         delivered.clear();
     }
 
     public void nextCycle(Node node, int protocolID) {
 
+        System.out.println("Node " + node.getID() + " is executing EpTOOrdering at cycle " + CommonState.getTime());
     }
 
     /**
@@ -81,7 +91,7 @@ public class EpTOOrdering implements CDProtocol {
      *
      * @param ball - a ball EpTO sent by another peer
      */
-    public void orderEvents(HashMap<Integer, Event> ball) {
+    public void orderEvents(Ball ball, Node node) {
 
         // TODO: handle when ball is null
 
@@ -140,7 +150,7 @@ public class EpTOOrdering implements CDProtocol {
         for (Event event : sortedDeliverableEvents) {
             delivered.add(event.id);
             lastDeliveredTimestamp = event.timestamp;
-            deliver(event);
+            EpTODeliver(event, node);
         }
     }
 
@@ -162,11 +172,6 @@ public class EpTOOrdering implements CDProtocol {
         return sorted;
     }
 
-    // TODO: deliver event to the application
-    private void deliver(Event event) {
-        System.out.println("I have delivered " + event);
-    }
-
     public Object clone() {
         try {
             return super.clone();
@@ -174,5 +179,11 @@ public class EpTOOrdering implements CDProtocol {
             e.printStackTrace();
         }
         return null;
+    }
+
+    // TODO: deliver event to the application
+    public void EpTODeliver(Event event, Node node) {
+        EpTOApplication application = (EpTOApplication) node.getProtocol(EpTOApplication.PID);
+        application.EpTODeliver(event, node);
     }
 }
