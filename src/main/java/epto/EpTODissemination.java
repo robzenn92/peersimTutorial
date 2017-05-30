@@ -5,7 +5,6 @@ import epto.utils.Event;
 import epto.utils.Utils;
 
 import peersim.cdsim.CDProtocol;
-import peersim.config.ConfigProperties;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
@@ -26,7 +25,7 @@ import java.util.List;
  * The dissemination component consists of three procedures executed atomically: the event broadcast primitive,
  * the event receive callback and the periodic relaying task.
  */
-public class EpTODissemination implements CDProtocol, EpTOBroadcaster {
+public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaster {
 
     // =================================
     //  Configuration Parameters
@@ -123,6 +122,7 @@ public class EpTODissemination implements CDProtocol, EpTOBroadcaster {
     private void send(Ball nextBall, Node source, Node destination) {
 
         if (destination.isUp()) {
+            System.out.println(source.getID() + " is sending to " + destination.getID() + " the ball: " + nextBall.toString());
             ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall, PID);
         }
     }
@@ -146,6 +146,7 @@ public class EpTODissemination implements CDProtocol, EpTOBroadcaster {
         event.timestamp = CommonState.getIntTime(); // getClock()
         event.ttl = 0;
         event.sourceId = node.getID();
+        System.out.println(node.getID() + " is adding " + event + " to " + nextBall.toString());
         nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
     }
 
@@ -161,6 +162,8 @@ public class EpTODissemination implements CDProtocol, EpTOBroadcaster {
     public void processEvent(Node node, int pid, Object object) {
 
         Ball ball = (Ball) object;
+
+//        System.out.println(node.getID() + " received " + ball.toString());
 
         // foreach event in ball do
         for (Event event : ball.values()) {

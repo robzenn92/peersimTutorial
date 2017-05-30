@@ -94,6 +94,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
     public void orderEvents(Ball ball, Node node) {
 
         // TODO: handle when ball is null
+        System.out.println(node.getID() + " is ordering events");
 
         // update TTL of received events
         for (Event event : received.values()) {

@@ -40,7 +40,17 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
     public EpTOApplication(String prefix) {
 
         PID = Configuration.lookupPid(prefix.replace("protocol.",""));
-        prob =  Configuration.getInt(prefix + "." + PAR_PROB);
+        prob =  Configuration.getDouble(prefix + "." + PAR_PROB);
+    }
+
+    public void nextCycle(Node node, int i) {
+
+        System.out.println(node.getID() + " is executing Application");
+
+        if (CommonState.r.nextDouble() <= prob) {
+            System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event at cycle " + CommonState.getTime());
+            EpTOBroadcast(new Event(), node);
+        }
     }
 
     public void EpTOBroadcast(Event event, Node node) {
@@ -49,18 +59,14 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
         disseminationComponent.EpTOBroadcast(event, node);
     }
 
-    public void nextCycle(Node node, int protocolID) {
-
-        if (CommonState.r.nextDouble() > prob) {
-            System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event at cycle " + CommonState.getTime());
-            EpTOBroadcast(new Event(), node);
-        }
-    }
-
     public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         return null;
     }
-
 
     public void EpTODeliver(Event event, Node node) {
         System.out.println("Node " + node.getID() + " just EpTODelivered event " + event);
