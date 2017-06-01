@@ -31,7 +31,7 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
     /**
      * The probability to EpTOBroadcast an event
      */
-    private final double prob;
+    private final double PROB;
 
     // =================================
     //  Constructor implementation
@@ -40,14 +40,14 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
     public EpTOApplication(String prefix) {
 
         PID = Configuration.lookupPid(prefix.replace("protocol.",""));
-        prob =  Configuration.getDouble(prefix + "." + PAR_PROB);
+        PROB =  Configuration.getDouble(prefix + "." + PAR_PROB);
     }
 
     public void nextCycle(Node node, int i) {
 
         System.out.println(node.getID() + " is executing Application");
 
-        if (CommonState.r.nextDouble() <= prob) {
+        if (CommonState.r.nextDouble() <= PROB) {
             System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event at cycle " + CommonState.getTime());
             EpTOBroadcast(new Event(), node);
         }
