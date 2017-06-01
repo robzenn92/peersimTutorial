@@ -10,14 +10,14 @@ public class Event implements Comparable<Event>{
 
     public int ttl;
 
-    public int sourceId;
+    public long sourceId;
 
     public Event() {
         id = CommonState.r.nextInt();
     }
 
     public int compareTo(Event o) {
-        return (timestamp - o.timestamp) + (sourceId - o.sourceId);
+        return (timestamp - o.timestamp) + (int)(sourceId - o.sourceId);
     }
 
     @Override

@@ -1,19 +1,19 @@
 package epto;
 
+import epto.utils.Ball;
 import epto.utils.Event;
 import epto.utils.Utils;
-
-import newscast.NewscastProtocol;
-import newscast.utils.NodeDescriptor;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
+import peersim.edsim.EDProtocol;
+import peersim.transport.Transport;
+import pss.IPeerSamplingService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 /**
  * The EpTO dissemination component
@@ -25,7 +25,7 @@ import java.util.HashMap;
  * The dissemination component consists of three procedures executed atomically: the event broadcast primitive,
  * the event receive callback and the periodic relaying task.
  */
-public class EpTODissemination implements CDProtocol {
+public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaster {
 
     // =================================
     //  Configuration Parameters
@@ -44,15 +44,14 @@ public class EpTODissemination implements CDProtocol {
      */
     private static final String PAR_TTL = "ttl";
 
-    /**
-     * The ordering component protocol that the dissemination component must know in order to invoke orderEvents
-     */
-    private static final String PAR_PROT_ORD = "protocol_ord";
-
-
     // =================================
     //  Parameters
     // =================================
+
+    /**
+     * The id of this protocol in the protocol array
+     */
+    public static int PID = 0;
 
     /**
      * The number of deemed correct processes
@@ -65,24 +64,76 @@ public class EpTODissemination implements CDProtocol {
     private final int TTL;
 
     /**
-     * The id of the ordering component protocol
-     */
-    private final int id_ord_protocol;
-
-    /**
      * The nextBall set collects the events to be sent in the next round by process p
+     * It relies on an HashMap<Integer, Event>
      */
-    private HashMap<Integer, Event> nextBall = new HashMap<Integer, Event>();
+    private Ball nextBall = new Ball();
 
     // =================================
     //  Constructor implementation
     // =================================
 
-    public EpTODissemination(String n) {
+    public EpTODissemination(String prefix) {
 
-        K = Configuration.getInt(n + "." + PAR_FANOUT, Utils.DEFAULT_FANOUT);
-        TTL = Configuration.getInt(n + "." + PAR_TTL, Utils.DEFAULT_TTL);
-        id_ord_protocol = Configuration.getPid(n + "." + PAR_PROT_ORD);
+        PID = Configuration.lookupPid(prefix.replace("protocol.",""));
+        K = Configuration.getInt(prefix + "." + PAR_FANOUT, Utils.DEFAULT_FANOUT);
+        TTL = Configuration.getInt(prefix + "." + PAR_TTL, Utils.DEFAULT_TTL);
+    }
+
+    /**
+     * Task executed every delta time units
+     * @param node the node on which this component is run
+     * @param protocolID the id of this protocol in the protocol array
+     */
+    public void nextCycle(Node node, int protocolID) {
+
+        // Getting the Peer Sampling Services used in the experiment
+        IPeerSamplingService pss = (IPeerSamplingService) node.getProtocol(FastConfig.getLinkable(protocolID));
+
+        if (pss.degree() > 0) {
+
+            System.out.println("Node " + node.getID() + " is executing EpTODissemination at cycle " + CommonState.getTime());
+
+            // foreach event in nextBall do
+            for (Event event : nextBall.values()) {
+                // event.ttl event.ttl + 1
+                event.ttl++;
+            }
+
+            if (nextBall.size() != 0) {
+
+                List<Node> peers = pss.selectNeighbors(K);
+
+                // foreach q in peers do send BALL(nextBall) to q
+                for (Node q : peers) {
+                    send(nextBall, node, q);
+                }
+            }
+
+            // orderEvents(nextBall)
+            EpTOOrdering orderingComponent = (EpTOOrdering) node.getProtocol(EpTOOrdering.PID);
+            orderingComponent.orderEvents((Ball) nextBall.clone(), node);
+
+            // nextBall = 0
+            nextBall.clear();
+        }
+    }
+
+    private void send(Ball nextBall, Node source, Node destination) {
+
+        if (destination.isUp()) {
+            System.out.println(source.getID() + " is sending to " + destination.getID() + " the ball: " + nextBall.toString());
+            ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall, PID);
+        }
+    }
+
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -91,12 +142,11 @@ public class EpTODissemination implements CDProtocol {
      * When p broadcasts an event (lines 6–10), the event is time-stamped with p’s current clock,
      * its ttl is set to zero, and it is added to the nextBall to be relayed in the next round.
      */
-    private void EpTO_Broadcast() {
-
-        Event event = new Event();
+    public void EpTOBroadcast(Event event, Node node) {
         event.timestamp = CommonState.getIntTime(); // getClock()
         event.ttl = 0;
-        event.sourceId = 1; // TODO: change with this.Node.getID()
+        event.sourceId = node.getID();
+        System.out.println(node.getID() + " is adding " + event + " to " + nextBall.toString());
         nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
     }
 
@@ -107,9 +157,13 @@ public class EpTODissemination implements CDProtocol {
      * When a received event is already in nextBall, we keep the one with the largest ttl to avoid excessive retransmissions.
      * Finally, the process clock is updated.
      *
-     * @param ball - a ball EpTO broadcasted by another peer
+     * @param object - a ball EpTO broadcasted by another peer
      */
-    private void receive(HashMap<Integer, Event> ball) {
+    public void processEvent(Node node, int pid, Object object) {
+
+        Ball ball = (Ball) object;
+
+//        System.out.println(node.getID() + " received " + ball.toString());
 
         // foreach event in ball do
         for (Event event : ball.values()) {
@@ -132,52 +186,5 @@ public class EpTODissemination implements CDProtocol {
             // only needed with logical time
             // updateClock(event.timestamp)
         }
-    }
-
-    // task every delta time units
-    public void nextCycle(Node node, int protocolID) {
-
-        int linkableID = FastConfig.getLinkable(protocolID);
-        NewscastProtocol linkable = (NewscastProtocol) node.getProtocol(linkableID);
-
-        if (linkable.degree() > 0) {
-
-            // foreach event in nextBall do
-            for (Event event : nextBall.values()) {
-                // event.ttl event.ttl + 1
-                event.ttl++;
-            }
-
-            if (nextBall.size() != 0) {
-
-                ArrayList<NodeDescriptor> peers = linkable.selectNeighbors(K);
-
-                // foreach q in peers do send BALL(nextBall) to q
-                for (NodeDescriptor q : peers) {
-                    send(nextBall, q.getNode(), protocolID);
-                }
-            }
-
-            // orderEvents(nextBall)
-            EpTOOrdering EpTOOrdering = (EpTOOrdering) node.getProtocol(id_ord_protocol);
-            EpTOOrdering.orderEvents((HashMap<Integer, Event>) nextBall.clone());
-
-            // nextBall = 0
-            nextBall.clear();
-        }
-    }
-
-    private void send(HashMap<Integer, Event> nextBall, Node peer, int protocolID) {
-        EpTODissemination EpTODissemination = (EpTODissemination) peer.getProtocol(protocolID);
-        EpTODissemination.receive((HashMap<Integer, Event>) nextBall.clone());
-    }
-
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

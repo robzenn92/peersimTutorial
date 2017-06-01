@@ -6,14 +6,13 @@ import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
 
-import newscast.utils.NodeDescriptor;
 import newscast.utils.PartialView;
 import newscast.utils.Utils;
 import pss.PeerSamplingService;
 
 import java.util.ArrayList;
 
-public class NewscastProtocol extends PeerSamplingService implements CDProtocol, Linkable {
+public class NewscastProtocol extends PeerSamplingService implements Linkable {
 
 
     // =================================
@@ -57,17 +56,22 @@ public class NewscastProtocol extends PeerSamplingService implements CDProtocol,
     //  Newscast implementation
     // =================================
 
-    public NodeDescriptor selectNeighbor() {
-        return view.getRandomPeer();
+    public Node selectNeighbor() {
+        return view.getRandomPeer().getNode();
     }
 
-    public ArrayList<NodeDescriptor> selectNeighbors(int k) {
+    public ArrayList<Node> selectNeighbors(int k) {
 
-        ArrayList<NodeDescriptor> neighbors = new ArrayList<NodeDescriptor>(k);
-        do {
-            neighbors.add(selectNeighbor());
+        int degree = degree();
+        int max = Math.max(k, degree);
+        ArrayList<Node> neighbors = new ArrayList<Node>(k);
+
+        while (neighbors.size() != max) {
+            Node n = selectNeighbor();
+            if (!neighbors.contains(n)) {
+                neighbors.add(n);
+            }
         }
-        while (neighbors.size() != k);
         return neighbors;
     }
 
@@ -116,11 +120,11 @@ public class NewscastProtocol extends PeerSamplingService implements CDProtocol,
 
     public void myTurn(Node node, int pid) {
 
-        System.out.println("Node " + node.getID() + " is executing Newscast at cycle " + CommonState.getTime());
+        System.out.println("Node " + node.getID() + " is updating its view with Newscast at cycle " + CommonState.getTime());
 
         // Get a random peer from the PartialView
-        NodeDescriptor neighbour = selectNeighbor();
-        NewscastProtocol destination = (NewscastProtocol) neighbour.getNode().getProtocol(pid);
+        Node neighbour = selectNeighbor();
+        NewscastProtocol destination = (NewscastProtocol) neighbour.getProtocol(pid);
 
         // Merge everything
         PartialView cloned = null;
@@ -130,7 +134,7 @@ public class NewscastProtocol extends PeerSamplingService implements CDProtocol,
             e.printStackTrace();
         }
 
-        view.merge(destination.getView(), node, neighbour.getNode());
+        view.merge(destination.getView(), node, neighbour);
         // destination.getView().merge(cloned, neighbour.getNode(), node);
     }
 }
