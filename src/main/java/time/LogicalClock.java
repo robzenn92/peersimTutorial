@@ -40,9 +40,12 @@ public class LogicalClock implements Comparable<LogicalClock> {
     }
 
     @Override
-    public LogicalClock clone() throws CloneNotSupportedException {
-        super.clone();
-        return new LogicalClock(nodeId, eventId);
+    public String toString() {
+        return "{nodeId=" + nodeId + ", eventId=" + eventId + "}";
     }
 
+    @Override
+    public LogicalClock clone() throws CloneNotSupportedException {
+        return new LogicalClock(nodeId, eventId);
+    }
 }
