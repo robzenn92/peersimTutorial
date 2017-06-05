@@ -45,7 +45,7 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
 
     public void nextCycle(Node node, int i) {
 
-        System.out.println(node.getID() + " is executing Application");
+        System.out.println(node.getID() + " is executing Application with PROB = " + PROB);
 
         if (CommonState.r.nextDouble() <= PROB) {
             System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event at cycle " + CommonState.getTime());
