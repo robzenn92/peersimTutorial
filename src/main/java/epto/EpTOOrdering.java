@@ -108,7 +108,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
             // (lastDeliveredTs) is discarded
             // Delivering such an event in the former case would violate integrity due to the delivery of a duplicate,
             // and in the latter case would violate total order.
-            if (!delivered.contains(event.id) || event.timestamp >= lastDeliveredTimestamp) {
+            if (!delivered.contains(event.id) || event.timestamp.getEventId() >= lastDeliveredTimestamp) {
                 if (received.containsKey(event.id)) {
                     if (received.get(event.id).ttl < event.ttl) {
                         received.get(event.id).ttl = event.ttl;
@@ -129,15 +129,15 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
             // an event e becomes deliverable if it is deemed so by the isDeliverable oracle
             if (isDeliverable(event)) {
                 deliverableEvents.put(event.id, event);
-            } else if (minQueuedTimestamp > event.timestamp) {
-                minQueuedTimestamp = event.timestamp;
+            } else if (minQueuedTimestamp > event.timestamp.getEventId()) {
+                minQueuedTimestamp = event.timestamp.getEventId();
             }
         }
 
         // purge from deliverableEvents all the events whose timestamp is greater than minQueuedTs,
         // as they cannot yet be delivered without violating total order.
         for (Event event : deliverableEvents.values()) {
-            if (event.timestamp > minQueuedTimestamp) {
+            if (event.timestamp.getEventId() > minQueuedTimestamp) {
                 // ignore deliverable events with timestamp greater than all non-deliverable events
                 deliverableEvents.remove(event.id);
             } else {
@@ -150,7 +150,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
         ArrayList<Event> sortedDeliverableEvents = sortEvents(deliverableEvents);
         for (Event event : sortedDeliverableEvents) {
             delivered.add(event.id);
-            lastDeliveredTimestamp = event.timestamp;
+            lastDeliveredTimestamp = event.timestamp.getEventId();
             EpTODeliver(event, node);
         }
     }
@@ -174,12 +174,23 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
     }
 
     public Object clone() {
+
+        EpTOOrdering ordering = null;
         try {
-            return super.clone();
+            ordering  = (EpTOOrdering) super.clone();
+            ordering.received = new HashMap<Integer, Event>();
+            ordering.delivered = new HashSet<Integer>();
+            ordering.lastDeliveredTimestamp = 0;
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        return null;
+        return ordering;
+    }
+
+    // TODO: deliver event to the application
+    public void EpTODeliver(Event event, Node node) {
+        EpTOApplication application = (EpTOApplication) node.getProtocol(EpTOApplication.PID);
+        application.EpTODeliver(event, node);
     }
 
     // TODO: deliver event to the application

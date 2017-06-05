@@ -1,12 +1,13 @@
 package epto.utils;
 
 import peersim.core.CommonState;
+import time.LogicalClock;
 
 public class Event implements Comparable<Event>{
 
     public int id;
 
-    public int timestamp;
+    public LogicalClock timestamp;
 
     public int ttl;
 
@@ -17,11 +18,12 @@ public class Event implements Comparable<Event>{
     }
 
     public int compareTo(Event o) {
-        return (timestamp - o.timestamp) + (int)(sourceId - o.sourceId);
+        int comparisionVC = timestamp.compareTo(o.timestamp);
+        return (comparisionVC != 0)? comparisionVC : (int)(sourceId - o.sourceId);
     }
 
     @Override
     public String toString() {
-        return "{id=" + id + ", timestamp=" + timestamp + ", ttl=" + ttl + ", sourceId=" + sourceId + '}';
+        return "{id=" + id + ", timestamp=" + timestamp + ", ttl=" + ttl + ", sourceId=" + sourceId + "}";
     }
 }
