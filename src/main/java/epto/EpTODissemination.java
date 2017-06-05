@@ -86,6 +86,53 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         TTL = Configuration.getInt(prefix + "." + PAR_TTL, Utils.DEFAULT_TTL);
     }
 
+    /**
+     * Task executed every delta time units
+     * @param node the node on which this component is run
+     * @param protocolID the id of this protocol in the protocol array
+     */
+    public void nextCycle(Node node, int protocolID) {
+
+        // Getting the Peer Sampling Services used in the experiment
+        IPeerSamplingService pss = (IPeerSamplingService) node.getProtocol(FastConfig.getLinkable(protocolID));
+
+        if (pss.degree() > 0) {
+
+            System.out.println("Node " + node.getID() + " is executing EpTODissemination at cycle " + CommonState.getTime());
+
+            // foreach event in nextBall do
+            for (Event event : nextBall.values()) {
+                // event.ttl event.ttl + 1
+                event.ttl++;
+            }
+
+            if (nextBall.size() != 0) {
+
+                List<Node> peers = pss.selectNeighbors(K);
+
+                // foreach q in peers do send BALL(nextBall) to q
+                for (Node q : peers) {
+                    send(nextBall, node, q);
+                }
+            }
+
+            // orderEvents(nextBall)
+            EpTOOrdering orderingComponent = (EpTOOrdering) node.getProtocol(EpTOOrdering.PID);
+            orderingComponent.orderEvents((Ball) nextBall.clone(), node);
+
+            // nextBall = 0
+            nextBall.clear();
+        }
+    }
+
+    private void send(Ball nextBall, Node source, Node destination) {
+
+        if (destination.isUp()) {
+            System.out.println(source.getID() + " is sending to " + destination.getID() + " the ball: " + nextBall.toString());
+            ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall, PID);
+        }
+    }
+
     // =================================
     //  Implementation
     // =================================

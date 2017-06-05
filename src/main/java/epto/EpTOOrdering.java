@@ -192,4 +192,10 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
         EpTOApplication application = (EpTOApplication) node.getProtocol(EpTOApplication.PID);
         application.EpTODeliver(event, node);
     }
+
+    // TODO: deliver event to the application
+    public void EpTODeliver(Event event, Node node) {
+        EpTOApplication application = (EpTOApplication) node.getProtocol(EpTOApplication.PID);
+        application.EpTODeliver(event, node);
+    }
 }
