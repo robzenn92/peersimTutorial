@@ -71,7 +71,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
     private Ball nextBall = new Ball();
 
     /**
-     * Last updated VectorClock
+     * Last updated LogicalClock
      */
     private LogicalClock lastLogicalClock;
 
