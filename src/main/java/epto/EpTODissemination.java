@@ -12,6 +12,7 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
 import pss.IPeerSamplingService;
+import time.LogicalClock;
 
 import java.util.List;
 
@@ -69,6 +70,11 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
      */
     private Ball nextBall = new Ball();
 
+    /**
+     * Last updated VectorClock
+     */
+    private LogicalClock lastLogicalClock;
+
     // =================================
     //  Constructor implementation
     // =================================
@@ -78,6 +84,29 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         PID = Configuration.lookupPid(prefix.replace("protocol.",""));
         K = Configuration.getInt(prefix + "." + PAR_FANOUT, Utils.DEFAULT_FANOUT);
         TTL = Configuration.getInt(prefix + "." + PAR_TTL, Utils.DEFAULT_TTL);
+    }
+
+    // =================================
+    //  Implementation
+    // =================================
+
+    /**
+     * procedure EpTO-broadcast(event)
+     *
+     * When p broadcasts an event (lines 6–10), the event is time-stamped with p’s current clock,
+     * its ttl is set to zero, and it is added to the nextBall to be relayed in the next round.
+     */
+    public void EpTOBroadcast(Event event, Node node) {
+
+        try {
+            event.timestamp = getClock(node.getID());
+        } catch (CloneNotSupportedException e) {
+            event.timestamp = new LogicalClock(node.getID());
+        }
+        event.ttl = 0;
+        event.sourceId = node.getID();
+        System.out.println(node.getID() + " is adding " + event + " to " + nextBall.toString());
+        nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
     }
 
     /**
@@ -110,6 +139,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
                 }
             }
 
+            // TODO: maybe this can be put within the above statement cause if nextBall is empty there is no need to order it
             // orderEvents(nextBall)
             EpTOOrdering orderingComponent = (EpTOOrdering) node.getProtocol(EpTOOrdering.PID);
             orderingComponent.orderEvents((Ball) nextBall.clone(), node);
@@ -127,29 +157,6 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         }
     }
 
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * procedure EpTO-broadcast(event)
-     *
-     * When p broadcasts an event (lines 6–10), the event is time-stamped with p’s current clock,
-     * its ttl is set to zero, and it is added to the nextBall to be relayed in the next round.
-     */
-    public void EpTOBroadcast(Event event, Node node) {
-        event.timestamp = CommonState.getIntTime(); // getClock()
-        event.ttl = 0;
-        event.sourceId = node.getID();
-        System.out.println(node.getID() + " is adding " + event + " to " + nextBall.toString());
-        nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
-    }
-
     /**
      * upon receive BALL(ball)
      *
@@ -162,8 +169,6 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
     public void processEvent(Node node, int pid, Object object) {
 
         Ball ball = (Ball) object;
-
-//        System.out.println(node.getID() + " received " + ball.toString());
 
         // foreach event in ball do
         for (Event event : ball.values()) {
@@ -184,7 +189,28 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
                 }
             }
             // only needed with logical time
-            // updateClock(event.timestamp)
+            event.timestamp.increment();
         }
+    }
+
+    private LogicalClock getClock(long id) throws CloneNotSupportedException {
+        if (lastLogicalClock == null) {
+            lastLogicalClock = new LogicalClock(id);
+        }
+        lastLogicalClock.increment();
+        return lastLogicalClock.clone();
+    }
+
+    public Object clone() {
+
+        EpTODissemination dissemination = null;
+        try {
+            dissemination  = (EpTODissemination) super.clone();
+            dissemination.nextBall = new Ball();
+            dissemination.lastLogicalClock = null;
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return dissemination;
     }
 }
