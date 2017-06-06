@@ -24,6 +24,6 @@ public class Event implements Comparable<Event>{
 
     @Override
     public String toString() {
-        return "{id=" + id + ", timestamp=" + timestamp + ", ttl=" + ttl + ", sourceId=" + sourceId + "}";
+        return "{timestamp=" + timestamp + ", ttl=" + ttl + ", sourceId=" + sourceId + "}";
     }
 }

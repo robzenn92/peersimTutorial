@@ -74,7 +74,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 
     public void nextCycle(Node node, int protocolID) {
 
-        System.out.println("Node " + node.getID() + " is executing EpTOOrdering at cycle " + CommonState.getTime());
+//        System.out.println("Node " + node.getID() + " is executing EpTOOrdering at cycle " + CommonState.getTime());
     }
 
     /**
@@ -94,7 +94,10 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
     public void orderEvents(Ball ball, Node node) {
 
         // TODO: handle when ball is null
-        System.out.println(node.getID() + " is ordering events");
+//        System.out.println(node.getID() + " is ordering events");
+//        System.out.println(node.getID() + " ball: " + ball);
+//        System.out.println(node.getID() + " received: " + received);
+//        System.out.println(node.getID() + " delivered: " + delivered);
 
         // update TTL of received events
         for (Event event : received.values()) {
@@ -108,7 +111,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
             // (lastDeliveredTs) is discarded
             // Delivering such an event in the former case would violate integrity due to the delivery of a duplicate,
             // and in the latter case would violate total order.
-            if (!delivered.contains(event.id) || event.timestamp.getEventId() >= lastDeliveredTimestamp) {
+            if (!delivered.contains(event.id) && event.timestamp.getEventId() >= lastDeliveredTimestamp) {
                 if (received.containsKey(event.id)) {
                     if (received.get(event.id).ttl < event.ttl) {
                         received.get(event.id).ttl = event.ttl;
@@ -119,8 +122,11 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
             }
         }
 
+//        System.out.println("----");
+//        System.out.println(node.getID() + " received: " + received);
+
         // collect deliverable events and determine smallest timestamp of non deliverable events
-        int minQueuedTimestamp = Integer.MAX_VALUE;
+        int minQueuedTimestamp = Integer.MAX_VALUE; // TODO: is this really an integer?
         HashMap<Integer, Event> deliverableEvents = new HashMap<Integer, Event>();
 
         // collect the deliverable events in the deliverableEvents set and calculate the minimum timestamp (minQueuedTs)
@@ -129,6 +135,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
             // an event e becomes deliverable if it is deemed so by the isDeliverable oracle
             if (isDeliverable(event)) {
                 deliverableEvents.put(event.id, event);
+                // TODO: what does minQueuedTimestamp > event.timestamp.getEventId() mean?
             } else if (minQueuedTimestamp > event.timestamp.getEventId()) {
                 minQueuedTimestamp = event.timestamp.getEventId();
             }
@@ -146,8 +153,15 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
             }
         }
 
+//        System.out.println(node.getID() + " deliverableEvents: " + deliverableEvents);
+//        System.out.println("----");
+
         // the events in deliverableEvents are delivered to the application in timestamp order
         ArrayList<Event> sortedDeliverableEvents = sortEvents(deliverableEvents);
+
+//        System.out.println(node.getID() + " sortedDeliverableEvents: " + sortedDeliverableEvents.toString());
+//        System.out.println("----");
+
         for (Event event : sortedDeliverableEvents) {
             delivered.add(event.id);
             lastDeliveredTimestamp = event.timestamp.getEventId();
