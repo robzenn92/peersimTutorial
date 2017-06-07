@@ -64,7 +64,7 @@ public class NewscastProtocol extends PeerSamplingService implements Linkable {
 
         int degree = degree();
         int max = Math.max(k, degree);
-        ArrayList<Node> neighbors = new ArrayList<Node>(k);
+        ArrayList<Node> neighbors = new ArrayList<Node>(max);
 
         while (neighbors.size() != max) {
             Node n = selectNeighbor();

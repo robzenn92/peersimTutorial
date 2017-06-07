@@ -18,8 +18,8 @@ public class Event implements Comparable<Event>{
     }
 
     public int compareTo(Event o) {
-        int comparisionVC = timestamp.compareTo(o.timestamp);
-        return (comparisionVC != 0)? comparisionVC : (int)(sourceId - o.sourceId);
+        int comparisionLC = timestamp.compareTo(o.timestamp);
+        return (comparisionLC != 0)? comparisionLC : (int)(sourceId - o.sourceId);
     }
 
     @Override

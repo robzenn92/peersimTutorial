@@ -6,6 +6,8 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
 
+import java.util.ArrayList;
+
 public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliverer {
 
     // =================================
@@ -32,6 +34,8 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
      * The probability to EpTOBroadcast an event
      */
     private final double PROB;
+
+    private ArrayList<Event> delivered = new ArrayList<Event>();
 
     // =================================
     //  Constructor implementation
@@ -72,5 +76,7 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
 
     public void EpTODeliver(Event event, Node node) {
         System.out.println("Node " + node.getID() + " just EpTODelivered event " + event);
+        delivered.add(event);
+        System.out.println("Node " + node.getID() + " delivered " + delivered);
     }
 }
