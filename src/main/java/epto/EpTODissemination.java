@@ -157,7 +157,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
 
         if (destination.isUp()) {
 //            System.out.println(source.getID() + " is sending to " + destination.getID() + " the ball: " + nextBall.toString());
-            ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall, PID);
+            ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall.clone(), PID);
         }
     }
 
@@ -213,7 +213,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         if (lastLogicalClock == null) {
             lastLogicalClock = new LogicalClock(id);
         }
-        lastLogicalClock.setEventId(Math.max(lastLogicalClock.getEventId(), lc.getEventId()) + 1);
+        lastLogicalClock.setEventId(Math.max(lastLogicalClock.getEventId(), lc.getEventId()));
         return lastLogicalClock.clone();
     }
 

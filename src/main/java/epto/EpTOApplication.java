@@ -5,10 +5,11 @@ import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
+import peersim.edsim.EDProtocol;
 
 import java.util.ArrayList;
 
-public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliverer {
+public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster, EpTODeliverer {
 
     // =================================
     //  Configuration Parameters
@@ -42,7 +43,6 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
     // =================================
 
     public EpTOApplication(String prefix) {
-
         PID = Configuration.lookupPid(prefix.replace("protocol.",""));
         PROB =  Configuration.getDouble(prefix + "." + PAR_PROB);
     }
@@ -78,5 +78,9 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
         System.out.println("Node " + node.getID() + " just EpTODelivered event " + event);
         delivered.add(event);
         System.out.println("Node " + node.getID() + " delivered " + delivered);
+    }
+
+    public void processEvent(Node node, int i, Object o) {
+
     }
 }
