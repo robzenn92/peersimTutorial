@@ -146,10 +146,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
             orderingComponent.orderEvents((Ball) nextBall.clone(), node);
 
             // nextBall = 0
-
-//            System.out.println(node.getID() + " nextBall before clear: " + nextBall);
             nextBall.clear();
-//            System.out.println(node.getID() + " nextBall after clear: " + nextBall);
         }
     }
 
@@ -209,12 +206,11 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         return lastLogicalClock.clone();
     }
 
-    private LogicalClock updateClock(long id, LogicalClock lc) throws CloneNotSupportedException {
+    private void updateClock(long id, LogicalClock lc) throws CloneNotSupportedException {
         if (lastLogicalClock == null) {
             lastLogicalClock = new LogicalClock(id);
         }
         lastLogicalClock.setEventId(Math.max(lastLogicalClock.getEventId(), lc.getEventId()));
-        return lastLogicalClock.clone();
     }
 
     public Object clone() {

@@ -5,7 +5,6 @@ import epto.utils.Event;
 import epto.utils.Utils;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Node;
 
 import java.util.HashMap;
@@ -126,7 +125,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 //        System.out.println(node.getID() + " received: " + received);
 
         // collect deliverable events and determine smallest timestamp of non deliverable events
-        int minQueuedTimestamp = Integer.MAX_VALUE; // TODO: is this really an integer?
+        int minQueuedTimestamp = Integer.MAX_VALUE;
         HashMap<Integer, Event> deliverableEvents = new HashMap<Integer, Event>();
 
         // collect the deliverable events in the deliverableEvents set and calculate the minimum timestamp (minQueuedTs)
