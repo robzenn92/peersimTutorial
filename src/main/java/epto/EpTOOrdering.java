@@ -5,6 +5,7 @@ import epto.utils.Event;
 import epto.utils.Utils;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Node;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 
 /**
  * The EpTO ordering component
@@ -73,7 +75,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 
     public void nextCycle(Node node, int protocolID) {
 
-//        System.out.println("Node " + node.getID() + " is executing EpTOOrdering at cycle " + CommonState.getTime());
+        System.out.println("Node " + node.getID() + " is executing EpTOOrdering at cycle " + CommonState.getTime());
     }
 
     /**
@@ -142,15 +144,29 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 
         // purge from deliverableEvents all the events whose timestamp is greater than minQueuedTs,
         // as they cannot yet be delivered without violating total order.
-        for (Event event : deliverableEvents.values()) {
+
+        Iterator<Event> iter = deliverableEvents.values().iterator();
+
+        while (iter.hasNext()) {
+            Event event = iter.next();
             if (event.timestamp.getEventId() > minQueuedTimestamp) {
                 // ignore deliverable events with timestamp greater than all non-deliverable events
-                deliverableEvents.remove(event.id);
+                iter.remove();
             } else {
                 // event can be delivered, remove from received events
                 received.remove(event.id);
             }
         }
+
+//        for (Event event : deliverableEvents.values()) {
+//            if (event.timestamp.getEventId() > minQueuedTimestamp) {
+//                // ignore deliverable events with timestamp greater than all non-deliverable events
+//                deliverableEvents.remove(event.id);
+//            } else {
+//                // event can be delivered, remove from received events
+//                received.remove(event.id);
+//            }
+//        }
 
 //        System.out.println(node.getID() + " deliverableEvents: " + deliverableEvents);
 //        System.out.println("----");

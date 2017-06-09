@@ -9,8 +9,6 @@ import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
-import peersim.edsim.EDProtocol;
-import peersim.transport.Transport;
 import pss.IPeerSamplingService;
 import time.LogicalClock;
 
@@ -26,7 +24,7 @@ import java.util.List;
  * The dissemination component consists of three procedures executed atomically: the event broadcast primitive,
  * the event receive callback and the periodic relaying task.
  */
-public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaster {
+public class EpTODissemination implements CDProtocol, EpTOBroadcaster {
 
     // =================================
     //  Configuration Parameters
@@ -106,7 +104,6 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         }
         event.ttl = 0;
         event.sourceId = node.getID();
-//        System.out.println(node.getID() + " is adding " + event + " to " + nextBall.toString());
         nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
     }
 
@@ -122,7 +119,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
 
         if (pss.degree() > 0 && CommonState.getTime() > 0) {
 
-//            System.out.println("Node " + node.getID() + " is executing EpTODissemination at cycle " + CommonState.getTime());
+            System.out.println("Node " + node.getID() + " is executing EpTODissemination at cycle " + CommonState.getTime());
 
             // foreach event in nextBall do
             for (Event event : nextBall.values()) {
@@ -154,7 +151,10 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
 
         if (destination.isUp()) {
 //            System.out.println(source.getID() + " is sending to " + destination.getID() + " the ball: " + nextBall.toString());
-            ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall.clone(), PID);
+//            ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, nextBall.clone(), PID);
+
+            EpTODissemination dissemination = (EpTODissemination) destination.getProtocol(EpTODissemination.PID);
+            dissemination.processEvent(destination, EpTODissemination.PID, nextBall.clone());
         }
     }
 

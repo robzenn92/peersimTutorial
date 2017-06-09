@@ -5,11 +5,10 @@ import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
-import peersim.edsim.EDProtocol;
 
 import java.util.ArrayList;
 
-public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster, EpTODeliverer {
+public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliverer {
 
     // =================================
     //  Configuration Parameters
@@ -49,11 +48,10 @@ public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster,
 
     public void nextCycle(Node node, int protocolID) {
 
-//        System.out.println(node.getID() + " is executing Application with PROB = " + PROB + " at cycle " + CommonState.getTime());
+        System.out.println(node.getID() + " is executing Application with PROB = " + PROB + " at cycle " + CommonState.getTime());
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             if (CommonState.r.nextDouble() <= PROB) {
-//                System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event at cycle " + CommonState.getTime());
                 EpTOBroadcast(new Event(), node);
             }
         }
@@ -78,9 +76,5 @@ public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster,
         System.out.println("Node " + node.getID() + " just EpTODelivered event " + event);
         delivered.add(event);
         System.out.println("Node " + node.getID() + " delivered " + delivered);
-    }
-
-    public void processEvent(Node node, int i, Object o) {
-
     }
 }
