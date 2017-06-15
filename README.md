@@ -15,6 +15,7 @@ Here there are 2 steps you need to follow in order to run an experiment using Ep
 2. `cd peersimTutorial && make all`
 
 The configurations written in `src/main/resources/newscast_ed.cfg` will be loaded.
+
 However, other configuration files are available and can be found in `src/main/resources/`.
 
 ## Protocols
