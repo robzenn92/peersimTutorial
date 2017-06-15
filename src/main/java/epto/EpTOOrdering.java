@@ -86,7 +86,7 @@ public class EpTOOrdering implements EDProtocol, EpTODeliverer {
      */
     public void orderEvents(Ball ball, Node node) {
 
-        System.out.println(node.getID() + " is ordering events");
+        System.out.println("Node " + node.getID() + " is ordering events");
 
         // update TTL of received events
         for (Event event : received.values()) {
@@ -106,7 +106,7 @@ public class EpTOOrdering implements EDProtocol, EpTODeliverer {
                         received.get(event.id).ttl = event.ttl;
                     }
                 } else {
-                    System.out.println(node.getID() + " has put in received : " + event);
+                    System.out.println("Node " + node.getID() + " has put in received : " + event);
                     received.put(event.id, event);
                 }
             }
@@ -121,7 +121,7 @@ public class EpTOOrdering implements EDProtocol, EpTODeliverer {
         for (Event event : received.values()) {
             // an event e becomes deliverable if it is deemed so by the isDeliverable oracle
             if (isDeliverable(event)) {
-                System.out.println(node.getID() + " has marked as deliverable : " + event);
+                System.out.println("Node " + node.getID() + " has marked as deliverable : " + event);
                 deliverableEvents.put(event.id, event);
                 // TODO: what does minQueuedTimestamp > event.timestamp.getEventId() mean?
             } else if (minQueuedTimestamp > event.timestamp.getEventId()) {

@@ -51,9 +51,9 @@ public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster,
 
     public void nextCycle(Node node, int protocolID) {
 
-        System.out.println(node.getID() + " maybe is broadcasting");
+        System.out.println("Node " + node.getID() + " enters EpTOApplication.nextCycle");
         if (CommonState.r.nextDouble() <= PROB) {
-            System.out.println(node.getID() + " is EpTOBroadcasting.." );
+            System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event");
             EpTOBroadcast(new Event(), node);
         }
     }
@@ -76,8 +76,8 @@ public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster,
 
     public void EpTODeliver(Event event, Node node) {
         delivered.add(event);
-        System.out.println(node.getID() + " delivered " + event);
-        System.out.println(node.getID() + " delivered in total " + delivered);
+        System.out.println("Node " + node.getID() + " delivered : " + event);
+        System.out.println("Node " + node.getID() + " delivered (till now) : " + delivered);
     }
 
     public void processEvent(Node node, int i, Object o) {

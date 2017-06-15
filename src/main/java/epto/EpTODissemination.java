@@ -106,7 +106,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         }
         event.ttl = 0;
         event.sourceId = node.getID();
-        System.out.println(node.getID() + " has put in nextball : " + event);
+        System.out.println("Node " + node.getID() + " has put in nextball : " + event);
         nextBall.put(event.id, event); // nextBall = nextBall U (event.id, event)
     }
 
@@ -117,7 +117,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
      */
     public void nextCycle(Node node, int protocolID) {
 
-        System.out.println(node.getID() + " is disseminating");
+        System.out.println("Node " + node.getID() + " enters EpTODissemination.nextCycle");
 
         // Getting the Peer Sampling Services used in the experiment
         IPeerSamplingService pss = (IPeerSamplingService) node.getProtocol(FastConfig.getLinkable(protocolID));
@@ -153,7 +153,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
     private void send(Ball nextBall, Node source, Node destination) {
         if (destination.isUp()) {
             ((Transport) source.getProtocol(FastConfig.getTransport(PID))).send(source, destination, new Message(Message.BROADCAST, nextBall.clone()), PID);
-            System.out.println(source.getID() + " has sent nextball: " + nextBall.clone().toString());
+            System.out.println("Node " + source.getID() + " has sent nextball: " + nextBall.clone().toString() + " to Node " + destination.getID());
         }
     }
 
@@ -195,7 +195,7 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
                             }
                         } else {
                             // nextBall = nextBall U (event.id, event)
-                            System.out.println(node.getID() + " has put in nextball : " + event);
+                            System.out.println("Node " + node.getID() + " has put in nextball : " + event);
                             nextBall.put(event.id, event);
                         }
                     }
