@@ -2,23 +2,20 @@ package epto;
 
 import epto.utils.Ball;
 import epto.utils.Event;
+import epto.utils.Message;
 import epto.utils.Utils;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Node;
+import peersim.edsim.EDProtocol;
+import peersim.edsim.EDSimulator;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * The EpTO ordering component
  */
-public class EpTOOrdering implements CDProtocol, EpTODeliverer {
+public class EpTOOrdering implements EDProtocol, EpTODeliverer {
 
     // =================================
     //  Configuration Parameters
@@ -48,12 +45,12 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
     /**
      * A received map of (id, event) pairs with all known but not yet delivered events
      */
-    private HashMap<Integer, Event> received = new HashMap<Integer, Event>();
+    private HashMap<UUID, Event> received = new HashMap<UUID, Event>();
 
     /**
      * A delivered set with all the events already delivered to the application
      */
-    private HashSet<Integer> delivered = new HashSet<Integer>();
+    private HashSet<UUID> delivered = new HashSet<UUID>();
 
     /**
      * The timestamp of the last event delivered
@@ -73,11 +70,6 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
         delivered.clear();
     }
 
-    public void nextCycle(Node node, int protocolID) {
-
-        System.out.println("Node " + node.getID() + " is executing EpTOOrdering at cycle " + CommonState.getTime());
-    }
-
     /**
      * Procedure orderEvents is called every round (line 27 of Al- gorithm 1) and its goal is to deliver events
      * to the application (Algorithm 2, line 30) via the deliver function.
@@ -94,11 +86,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
      */
     public void orderEvents(Ball ball, Node node) {
 
-        // TODO: handle when ball is null
-//        System.out.println(node.getID() + " is ordering events");
-//        System.out.println(node.getID() + " ball: " + ball);
-//        System.out.println(node.getID() + " received: " + received);
-//        System.out.println(node.getID() + " delivered: " + delivered);
+        System.out.println(node.getID() + " is ordering events");
 
         // update TTL of received events
         for (Event event : received.values()) {
@@ -118,23 +106,22 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
                         received.get(event.id).ttl = event.ttl;
                     }
                 } else {
+                    System.out.println(node.getID() + " has put in received : " + event);
                     received.put(event.id, event);
                 }
             }
         }
 
-//        System.out.println("----");
-//        System.out.println(node.getID() + " received: " + received);
-
         // collect deliverable events and determine smallest timestamp of non deliverable events
         int minQueuedTimestamp = Integer.MAX_VALUE;
-        HashMap<Integer, Event> deliverableEvents = new HashMap<Integer, Event>();
+        HashMap<UUID, Event> deliverableEvents = new HashMap<UUID, Event>();
 
         // collect the deliverable events in the deliverableEvents set and calculate the minimum timestamp (minQueuedTs)
         // of all the events that cannot yet be delivered
         for (Event event : received.values()) {
             // an event e becomes deliverable if it is deemed so by the isDeliverable oracle
             if (isDeliverable(event)) {
+                System.out.println(node.getID() + " has marked as deliverable : " + event);
                 deliverableEvents.put(event.id, event);
                 // TODO: what does minQueuedTimestamp > event.timestamp.getEventId() mean?
             } else if (minQueuedTimestamp > event.timestamp.getEventId()) {
@@ -144,38 +131,22 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 
         // purge from deliverableEvents all the events whose timestamp is greater than minQueuedTs,
         // as they cannot yet be delivered without violating total order.
-
-        Iterator<Event> iter = deliverableEvents.values().iterator();
-
-        while (iter.hasNext()) {
-            Event event = iter.next();
+        HashSet<UUID> nonDeliverableEvents = new HashSet<UUID>();
+        for (Event event : deliverableEvents.values()) {
             if (event.timestamp.getEventId() > minQueuedTimestamp) {
                 // ignore deliverable events with timestamp greater than all non-deliverable events
-                iter.remove();
+                nonDeliverableEvents.add(event.id);
             } else {
                 // event can be delivered, remove from received events
                 received.remove(event.id);
             }
         }
-
-//        for (Event event : deliverableEvents.values()) {
-//            if (event.timestamp.getEventId() > minQueuedTimestamp) {
-//                // ignore deliverable events with timestamp greater than all non-deliverable events
-//                deliverableEvents.remove(event.id);
-//            } else {
-//                // event can be delivered, remove from received events
-//                received.remove(event.id);
-//            }
-//        }
-
-//        System.out.println(node.getID() + " deliverableEvents: " + deliverableEvents);
-//        System.out.println("----");
+        for (UUID uuid : nonDeliverableEvents) {
+            deliverableEvents.remove(uuid);
+        }
 
         // the events in deliverableEvents are delivered to the application in timestamp order
         ArrayList<Event> sortedDeliverableEvents = sortEvents(deliverableEvents);
-
-//        System.out.println(node.getID() + " sortedDeliverableEvents: " + sortedDeliverableEvents.toString());
-//        System.out.println("----");
 
         for (Event event : sortedDeliverableEvents) {
             delivered.add(event.id);
@@ -188,7 +159,7 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
         return event.ttl > TTL;
     }
 
-    private ArrayList<Event> sortEvents(HashMap<Integer, Event> events) {
+    private ArrayList<Event> sortEvents(HashMap<UUID, Event> events) {
 
         ArrayList<Event> sorted = new ArrayList<Event>(events.size());
         sorted.addAll(events.values());
@@ -207,8 +178,8 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
         EpTOOrdering ordering = null;
         try {
             ordering  = (EpTOOrdering) super.clone();
-            ordering.received = new HashMap<Integer, Event>();
-            ordering.delivered = new HashSet<Integer>();
+            ordering.received = new HashMap<UUID, Event>();
+            ordering.delivered = new HashSet<UUID>();
             ordering.lastDeliveredTimestamp = 0;
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -218,7 +189,17 @@ public class EpTOOrdering implements CDProtocol, EpTODeliverer {
 
     // TODO: deliver event to the application
     public void EpTODeliver(Event event, Node node) {
-        EpTOApplication application = (EpTOApplication) node.getProtocol(EpTOApplication.PID);
-        application.EpTODeliver(event, node);
+        Message m = new Message(Message.DELIVER, event);
+        EDSimulator.add(0, m, node, EpTOApplication.PID);
+    }
+
+    public void processEvent(Node node, int i, Object o) {
+
+        Message m = (Message) o;
+        switch (m.getType()) {
+            case Message.ORDER:
+                orderEvents((Ball) m.getContent(), node);
+                break;
+        }
     }
 }

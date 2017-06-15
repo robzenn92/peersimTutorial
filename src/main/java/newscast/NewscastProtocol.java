@@ -120,7 +120,7 @@ public class NewscastProtocol extends PeerSamplingService implements Linkable {
 
     public void myTurn(Node node, int pid) {
 
-        System.out.println("Node " + node.getID() + " is updating its view with Newscast at cycle " + CommonState.getTime());
+//        System.out.println("Node " + node.getID() + " is updating its view with Newscast at cycle " + CommonState.getTime());
 
         // Get a random peer from the PartialView
         Node neighbour = selectNeighbor();

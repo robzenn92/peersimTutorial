@@ -1,14 +1,17 @@
 package epto;
 
 import epto.utils.Event;
+import epto.utils.Message;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
+import peersim.edsim.EDProtocol;
+import peersim.edsim.EDSimulator;
 
 import java.util.ArrayList;
 
-public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliverer {
+public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster, EpTODeliverer {
 
     // =================================
     //  Configuration Parameters
@@ -19,7 +22,7 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
      * Its value must be between 0 and 1
      * @config
      */
-    private static final String PAR_PROB= "prob";
+    private static final String PAR_PROB = "prob";
 
     // =================================
     //  Parameters
@@ -48,33 +51,41 @@ public class EpTOApplication implements CDProtocol, EpTOBroadcaster, EpTODeliver
 
     public void nextCycle(Node node, int protocolID) {
 
-        System.out.println(node.getID() + " is executing Application with PROB = " + PROB + " at cycle " + CommonState.getTime());
-
-        for (int i = 0; i < 2; i++) {
-            if (CommonState.r.nextDouble() <= PROB) {
-                EpTOBroadcast(new Event(), node);
-            }
+        System.out.println(node.getID() + " maybe is broadcasting");
+        if (CommonState.r.nextDouble() <= PROB) {
+            System.out.println(node.getID() + " is EpTOBroadcasting.." );
+            EpTOBroadcast(new Event(), node);
         }
     }
 
     public void EpTOBroadcast(Event event, Node node) {
-
-        EpTODissemination disseminationComponent = (EpTODissemination) node.getProtocol(EpTODissemination.PID);
-        disseminationComponent.EpTOBroadcast(event, node);
+        Message m = new Message(Message.PREBROADCAST, event);
+        EDSimulator.add(0, m, node, EpTODissemination.PID);
     }
 
     public Object clone() {
+        EpTOApplication epToApplication = null;
         try {
-            return super.clone();
+            epToApplication = (EpTOApplication) super.clone();
+            epToApplication.delivered = new ArrayList<Event>();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        return null;
+        return epToApplication;
     }
 
     public void EpTODeliver(Event event, Node node) {
-        System.out.println("Node " + node.getID() + " just EpTODelivered event " + event);
         delivered.add(event);
-        System.out.println("Node " + node.getID() + " delivered " + delivered);
+        System.out.println(node.getID() + " delivered " + event);
+        System.out.println(node.getID() + " delivered in total " + delivered);
+    }
+
+    public void processEvent(Node node, int i, Object o) {
+        Message m = (Message) o;
+        switch (m.getType()) {
+            case Message.DELIVER:
+                EpTODeliver((Event) m.getContent(), node);
+                break;
+        }
     }
 }

@@ -3,9 +3,11 @@ package epto.utils;
 import peersim.core.CommonState;
 import time.LogicalClock;
 
+import java.util.UUID;
+
 public class Event implements Comparable<Event>{
 
-    public int id;
+    public UUID id;
 
     public LogicalClock timestamp;
 
@@ -14,7 +16,7 @@ public class Event implements Comparable<Event>{
     public long sourceId;
 
     public Event() {
-        id = CommonState.r.nextInt();
+        id = UUID.randomUUID();
     }
 
     public int compareTo(Event o) {
