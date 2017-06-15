@@ -9,7 +9,7 @@ PeerSim source code can be downloaded from [http://peersim.sourceforge.net](http
 
 ## Protocols
 
-
+![EpTO Flow Schema](https://raw.githubusercontent.com/robzenn92/peersimTutorial/master/EpTO-flow.jpg)
 
 ### References
 
