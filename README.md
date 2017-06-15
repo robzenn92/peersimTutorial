@@ -7,6 +7,16 @@ PeerSim has been developed to cope with these properties and thus to reach extre
 
 PeerSim source code can be downloaded from [http://peersim.sourceforge.net](http://peersim.sourceforge.net/).
 
+## Setup
+
+Here there are 2 steps you need to follow in order to run an experiment using EpTO-related protocols:
+
+1. `git clone https://github.com/robzenn92/peersimTutorial.git`
+2. `cd peersimTutorial && make all`
+
+The configurations written in `src/main/resources/newscast_ed.cfg` will be loaded.
+However, other configuration files are available and can be found in `src/main/resources/`.
+
 ## Protocols
 
 ![EpTO Flow Schema](https://raw.githubusercontent.com/robzenn92/peersimTutorial/master/EpTO-flow.jpg)
