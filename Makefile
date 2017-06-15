@@ -7,7 +7,7 @@ prepare:
 	mkdir -p out/graph
 
 compile:
-	javac -sourcepath src -classpath $(LIB_JARS) -d target/classes $(shell find src -name *.java)
+	javac -sourcepath src -classpath $(LIB_JARS) -d target/classes $(shell find src/main -name *.java)
 
 run:
 	java -ea -cp $(LIB_JARS):target/classes peersim.Simulator src/main/resources/newscast.cfg
@@ -16,4 +16,4 @@ clean:
 	rm -rf target
 	rm -rf out
 
-all: clean compile run
+all: clean prepare compile run
