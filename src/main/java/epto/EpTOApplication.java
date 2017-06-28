@@ -7,7 +7,6 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import peersim.edsim.EDSimulator;
 
 import java.util.ArrayList;
 
@@ -50,7 +49,6 @@ public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster,
     }
 
     public void nextCycle(Node node, int protocolID) {
-
         System.out.println("Node " + node.getID() + " enters EpTOApplication.nextCycle");
         if (CommonState.r.nextDouble() <= PROB) {
             System.out.println("Node " + node.getID() + " is EpTOBroadcasting an event");
@@ -59,8 +57,11 @@ public class EpTOApplication implements CDProtocol, EDProtocol, EpTOBroadcaster,
     }
 
     public void EpTOBroadcast(Event event, Node node) {
-        Message m = new Message(Message.PREBROADCAST, event);
-        EDSimulator.add(0, m, node, EpTODissemination.PID);
+//        Message m = new Message(Message.PREBROADCAST, event);
+//        EDSimulator.add(10, m, node, EpTODissemination.PID);
+
+        EpTODissemination EpTO_dissemination = (EpTODissemination) node.getProtocol(EpTODissemination.PID);
+        EpTO_dissemination.EpTOBroadcast(event, node);
     }
 
     public Object clone() {

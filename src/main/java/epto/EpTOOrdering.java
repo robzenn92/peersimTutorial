@@ -4,7 +4,6 @@ import epto.utils.Ball;
 import epto.utils.Event;
 import epto.utils.Message;
 import epto.utils.Utils;
-import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -190,16 +189,16 @@ public class EpTOOrdering implements EDProtocol, EpTODeliverer {
     // TODO: deliver event to the application
     public void EpTODeliver(Event event, Node node) {
         Message m = new Message(Message.DELIVER, event);
-        EDSimulator.add(0, m, node, EpTOApplication.PID);
+        EDSimulator.add(10, m, node, EpTOApplication.PID);
     }
 
     public void processEvent(Node node, int i, Object o) {
 
-        Message m = (Message) o;
-        switch (m.getType()) {
-            case Message.ORDER:
-                orderEvents((Ball) m.getContent(), node);
-                break;
-        }
+//        Message m = (Message) o;
+//        switch (m.getType()) {
+//            case Message.ORDER:
+//                orderEvents((Ball) m.getContent(), node);
+//                break;
+//        }
     }
 }

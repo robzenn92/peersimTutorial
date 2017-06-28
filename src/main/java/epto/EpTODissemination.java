@@ -10,7 +10,6 @@ import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
-import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 import pss.IPeerSamplingService;
 import time.LogicalClock;
@@ -142,8 +141,10 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
 
             // TODO: maybe this can be put within the above statement cause if nextBall is empty there is no need to order it
             // orderEvents(nextBall)
-            Message m = new Message(Message.ORDER, nextBall.clone());
-            EDSimulator.add(0, m, node, EpTOOrdering.PID);
+//            Message m = new Message(Message.ORDER, nextBall.clone());
+//            EDSimulator.add(10, m, node, EpTOOrdering.PID);
+            EpTOOrdering EpTO_ordering = (EpTOOrdering) node.getProtocol(EpTOOrdering.PID);
+            EpTO_ordering.orderEvents((Ball) nextBall.clone(), node);
 
             // nextBall = 0
             nextBall.clear();
@@ -171,10 +172,10 @@ public class EpTODissemination implements CDProtocol, EDProtocol, EpTOBroadcaste
         Message m = (Message) object;
         switch (m.getType()) {
 
-            case Message.PREBROADCAST: {
-                    EpTOBroadcast((Event) m.getContent(), node);
-                }
-                break;
+//            case Message.PREBROADCAST: {
+//                    EpTOBroadcast((Event) m.getContent(), node);
+//                }
+//                break;
 
             case Message.BROADCAST: {
 
